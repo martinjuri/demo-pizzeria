@@ -1,0 +1,43 @@
+---
+import '@/styles/global.css';
+
+interface Props {
+	title: string;
+	description: string;
+	canonical?: string;
+	structuredData?: Array<Record<string, unknown>>;
+}
+
+const { title, description, canonical, structuredData = [] } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="theme-color" content="#0f0f12" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="/favicon.svg" />
+		{canonical && <link rel="canonical" href={canonical} />}
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		{
+			structuredData.map((item) => (
+				<script is:inline type="application/ld+json" set:html={JSON.stringify(item)} />
+			))
+		}
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

@@ -1,0 +1,1077 @@
+---
+export const prerender = true;
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { business, categories, localDetails, products, promoOfDay } from '@/data/store';
+
+const money = new Intl.NumberFormat('es-AR', {
+	style: 'currency',
+	currency: 'ARS',
+	maximumFractionDigits: 0,
+});
+
+const structuredData = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'Restaurant',
+		name: business.displayName,
+		description: business.description,
+		telephone: business.whatsappDisplay,
+		servesCuisine: 'Pizza',
+		areaServed: business.location,
+		url: Astro.url.href,
+	},
+	{
+		'@context': 'https://schema.org',
+		'@type': 'ItemList',
+		name: 'Carta Pizzeria',
+		itemListElement: products.map((product, index) => ({
+			'@type': 'ListItem',
+			position: index + 1,
+			item: {
+				'@type': 'Product',
+				name: product.name,
+				description: product.description,
+				offers: {
+					'@type': 'Offer',
+					price: product.price ?? product.variants?.[0]?.price ?? 0,
+					priceCurrency: 'ARS',
+					availability: 'https://schema.org/InStock',
+				},
+			},
+		})),
+	},
+];
+
+const categoriesWithProducts = categories.map((category) => ({
+	...category,
+	products: products.filter((product) => product.categoryId === category.id),
+}));
+
+const clientCatalog = products.map((product) => ({
+	id: product.id,
+	name: product.name,
+	description: product.description,
+	price: product.price ?? null,
+	variants: product.variants ?? [],
+	categoryId: product.categoryId,
+}));
+---
+
+<BaseLayout
+	title={`${business.displayName} | Demo TienditaWeb`}
+	description={business.description}
+	canonical={Astro.url.href}
+	structuredData={structuredData}
+>
+	<div class="relative isolate overflow-x-hidden">
+		<header data-site-header class="sticky top-0 z-50 border-b border-white/8 bg-[#131318]">
+			<div class="container-shell py-3">
+				<div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+					<a href="#inicio" class="min-w-0">
+						<p class="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-orange-200/80">TienditaWeb Demo</p>
+						<p class="brand-script mt-1 truncate text-xl font-bold text-white sm:text-2xl">{business.displayName}</p>
+					</a>
+
+					<nav
+						data-header-category-nav
+						data-category-nav
+						class="header-category-nav flex items-center justify-start gap-2 overflow-x-auto px-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center"
+					>
+						{
+							categories.map((category, index) => (
+								<a
+									href={`#${category.id}`}
+									data-category-link
+									data-category-id={category.id}
+									class={`category-pill ${index === 0 ? 'is-active' : ''}`}
+								>
+									<span aria-hidden="true">{category.icon}</span>
+									<span>{category.name}</span>
+								</a>
+							))
+						}
+					</nav>
+
+					<div class="flex items-center justify-end gap-2 sm:gap-3">
+						<span class="hidden min-w-[11.5rem] justify-center rounded-full border border-white/10 bg-[#1f1f26] px-5 py-2 text-xs font-semibold text-slate-200 lg:inline-flex">
+							Retiro en 20-30 min
+						</span>
+						<button
+							type="button"
+							data-open-cart
+							class="relative inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#1f1f26] px-4 py-2.5 text-sm font-semibold text-white hover:border-orange-300/35"
+						>
+							<span aria-hidden="true">🛒</span>
+							<span class="hidden sm:inline">Carrito</span>
+							<span
+								data-cart-count-badge
+								class="cart-badge--pulse inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white"
+							>
+								0
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main id="inicio">
+			<section class="section-space pb-6 pt-6 sm:pt-8">
+				<div class="container-shell">
+					<div class="hero-stage overflow-hidden px-0 py-2 sm:py-5">
+						<div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+							<div>
+								<span class="eyebrow">Pizzeria de barrio, look app-first</span>
+								<h1 class="mt-4 max-w-xl text-4xl font-bold text-white sm:text-5xl">
+									{business.headline}
+								</h1>
+								<p class="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+									{business.description}
+								</p>
+
+								<div class="mt-6 flex flex-wrap gap-3">
+									<a href="#pizzas" class="cta-primary">Ver menu</a>
+									<button type="button" data-open-cart class="cta-secondary">Abrir carrito</button>
+								</div>
+
+								<div class="mt-6 flex flex-wrap gap-2">
+									<span class="info-chip">🍕 Pizzas y combos</span>
+									<span class="info-chip">🥟 Extras para sumar</span>
+									<span class="info-chip">📲 Pedido directo por WhatsApp</span>
+								</div>
+							</div>
+
+							<div class="hero-visual">
+								<div class="hero-board" aria-hidden="true"></div>
+								<div class="hero-pizza" aria-hidden="true"></div>
+								<div class="hero-ticket p-4 sm:p-5">
+									<p class="text-xs font-semibold uppercase tracking-[0.22em] text-orange-200">Promo activa</p>
+									<div class="space-y-4 pb-5 pt-3">
+										<div>
+											<p class="text-lg font-bold text-white sm:text-xl">2 grandes + 6 empanadas</p>
+											<p class="mt-2 text-sm text-slate-300">Lista para resolver la noche sin friccion.</p>
+										</div>
+									</div>
+									<div class="flex items-end justify-between gap-4 pt-5">
+										<div>
+											<p class="text-[0.72rem] uppercase tracking-[0.2em] text-slate-400">Precio promo</p>
+											<p class="mt-2 text-2xl font-bold text-orange-100">{promoOfDay.priceLabel}</p>
+										</div>
+										<button type="button" data-open-cart class="cta-primary px-4 py-2.5">Pedir</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="mt-8 grid gap-3 sm:grid-cols-3">
+							<div class="metric-card">
+								<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Retiro</p>
+								<p class="mt-3 text-3xl font-bold text-white">20'</p>
+								<p class="mt-2 text-sm text-slate-300">Pedido agil</p>
+							</div>
+							<div class="metric-card">
+								<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Horario</p>
+								<p class="mt-3 text-3xl font-bold text-white">00:30</p>
+								<p class="mt-2 text-sm text-slate-300">Cocina abierta</p>
+							</div>
+							<div class="metric-card">
+								<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">WhatsApp</p>
+								<p class="mt-3 text-xl font-bold text-white">Pedido directo</p>
+								<p class="mt-2 text-sm text-slate-300">Sin checkout largo ni pasos extra.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section data-inline-categories class="pb-2">
+				<div class="container-shell">
+					<nav
+						data-category-nav
+						class="inline-categories-strip flex items-center justify-start gap-3 overflow-x-auto pb-1 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center"
+					>
+						{
+							categories.map((category, index) => (
+								<a
+									href={`#${category.id}`}
+									data-category-link
+									data-category-id={category.id}
+									class={`category-pill ${index === 0 ? 'is-active' : ''}`}
+								>
+									<span aria-hidden="true">{category.icon}</span>
+									<span>{category.name}</span>
+								</a>
+							))
+						}
+					</nav>
+				</div>
+			</section>
+
+			<section class="section-space pt-6">
+				<div class="container-shell space-y-10">
+					{
+						categoriesWithProducts.map((category) => (
+							<section id={category.id} data-category-section data-category-id={category.id} class="scroll-mt-40">
+								<div class="mb-5 flex items-end justify-between gap-4">
+									<div>
+										<p class="eyebrow">
+											<span aria-hidden="true">{category.icon}</span>
+											<span>{category.name}</span>
+										</p>
+										<h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl">{category.name}</h2>
+										<p class="mt-3 max-w-2xl text-slate-300">{category.description}</p>
+									</div>
+								</div>
+
+								<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+									{
+										category.products.map((product) => {
+											const firstVariant = product.variants?.[0];
+											const displayPrice = product.price ?? firstVariant?.price ?? 0;
+											const displayLabel = firstVariant?.label ?? 'Por unidad';
+
+											return (
+												<article class="product-card surface-card overflow-hidden p-4 sm:p-5">
+													<div class="flex items-start justify-between gap-3">
+														<div class="flex flex-wrap gap-2">
+															{product.badge && <span class="badge badge-hot">{product.badge}</span>}
+															<span class="badge badge-soft">{product.tag}</span>
+														</div>
+														<p class="text-right text-sm font-semibold text-orange-100">
+															<span data-price-display={product.id}>{money.format(displayPrice)}</span>
+															<span data-size-display={product.id} class="mt-1 block text-[0.72rem] uppercase tracking-[0.2em] text-slate-400">
+																{displayLabel}
+															</span>
+														</p>
+													</div>
+
+													<div
+														class="product-scene mt-4"
+														data-scene={product.scene}
+														style={`--dish-a:${product.palette[0]}; --dish-b:${product.palette[1]}; --dish-c:${product.palette[2]};`}
+													>
+														<div class="relative flex h-full min-h-[220px] flex-col justify-between p-4">
+															<div class="flex justify-between gap-2">
+																<span class="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
+																	{category.name}
+																</span>
+																<span class="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-yellow-100">
+																	Hecho al momento
+																</span>
+															</div>
+															<div class="flex flex-wrap gap-2">
+																{product.highlights.map((highlight) => (
+																	<span class="rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-xs font-medium text-white">
+																		{highlight}
+																	</span>
+																))}
+															</div>
+														</div>
+													</div>
+
+													<div class="mt-5">
+														<h3 class="text-2xl font-bold text-white">{product.name}</h3>
+														<p class="mt-3 text-sm leading-7 text-slate-300">{product.description}</p>
+
+														{
+															product.variants && (
+																<div class="mt-5">
+																	<p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Elegi tamano</p>
+																	<div class="flex flex-wrap gap-2">
+																		{product.variants.map((variant, index) => (
+																			<button
+																				type="button"
+																				data-variant-button
+																				data-product-id={product.id}
+																				data-variant-id={variant.id}
+																				data-variant-label={variant.label}
+																				data-variant-price={variant.price}
+																				aria-pressed={index === 0 ? 'true' : 'false'}
+																				class={`variant-button ${index === 0 ? 'is-selected' : ''}`}
+																			>
+																				{variant.label}
+																			</button>
+																		))}
+																	</div>
+																</div>
+															)
+														}
+
+														<button
+															type="button"
+															data-add-to-cart
+															data-product-id={product.id}
+															class="cta-primary mt-5 w-full"
+														>
+															Agregar
+														</button>
+													</div>
+												</article>
+											);
+										})
+									}
+								</div>
+							</section>
+						))
+					}
+				</div>
+			</section>
+
+			<section class="section-space pt-0">
+				<div class="container-shell">
+					<div class="promo-banner surface-panel overflow-hidden p-6 sm:p-7">
+						<div class="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+							<div>
+								<p class="eyebrow">🔥 {promoOfDay.title}</p>
+								<h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl">{promoOfDay.description}</h2>
+								<div class="mt-5 flex flex-wrap gap-2">
+									{promoOfDay.includes.map((item) => <span class="info-chip">{item}</span>)}
+								</div>
+							</div>
+							<div class="rounded-[26px] border border-white/12 bg-[#18181d] px-6 py-5 text-center">
+								<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Precio promo</p>
+								<p class="mt-3 text-4xl font-bold text-white">{promoOfDay.priceLabel}</p>
+								<button type="button" data-open-cart class="cta-primary mt-5">Sumar al pedido</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section-space pt-0">
+				<div class="container-shell grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+					<div class="surface-panel overflow-hidden p-6 sm:p-7">
+						<p class="eyebrow">Informacion del local</p>
+						<h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl">Pedido simple y retiro sin vueltas</h2>
+						<p class="mt-4 max-w-xl text-slate-300">
+							Toda la info importante esta visible para que el cliente entienda rapido donde retirar, cuando y como contactarse.
+						</p>
+
+						<div class="mt-6 grid gap-4 sm:grid-cols-2">
+							{
+								localDetails.map((item) => (
+									<article class="surface-card h-full p-5">
+										<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">{item.label}</p>
+										<p class="mt-3 text-xl font-bold text-white">{item.value}</p>
+										<p class="mt-3 text-sm leading-6 text-slate-300">{item.description}</p>
+									</article>
+								))
+							}
+						</div>
+					</div>
+
+					<div class="surface-panel overflow-hidden p-4 sm:p-5">
+						<div class="map-mock relative min-h-[360px] rounded-[24px] border border-white/10">
+							<div class="map-road left-[12%] top-[14%] h-4 w-[72%] rotate-[14deg]"></div>
+							<div class="map-road left-[18%] top-[46%] h-4 w-[58%] -rotate-[8deg]"></div>
+							<div class="map-road left-[58%] top-[12%] h-[72%] w-4 rotate-[10deg]"></div>
+							<div class="map-road left-[26%] top-[24%] h-[56%] w-3 -rotate-[24deg]"></div>
+
+							<div class="absolute left-[52%] top-[44%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+								<div class="flex h-16 w-16 items-center justify-center rounded-full border border-white/12 bg-brand-orange text-3xl shadow-[0_18px_50px_rgba(239,68,68,0.25)]">
+									📍
+								</div>
+								<div class="mt-3 rounded-full border border-white/10 bg-[#121218]/90 px-4 py-2 text-sm font-semibold text-white">
+									{business.displayName}
+								</div>
+							</div>
+
+							<div class="absolute bottom-4 left-4 rounded-[22px] border border-white/10 bg-[#121218] px-4 py-3 text-sm text-slate-200">
+								<p class="font-semibold text-white">{business.location}</p>
+								<p class="mt-1 text-slate-300">{business.service}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<footer class="border-t border-white/8 py-8">
+			<div class="container-shell flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+				<div>
+					<h2 class="brand-script text-2xl font-bold text-white">{business.displayName}</h2>
+					<p class="mt-3 max-w-lg text-sm text-slate-300">
+						Menu online mobile-first para mostrar una experiencia realista de pedido simple dentro de TienditaWeb.
+					</p>
+				</div>
+
+				<div class="grid gap-4 text-sm text-slate-300 sm:grid-cols-3">
+					<div>
+						<p class="font-semibold text-white">Contacto</p>
+						<p class="mt-2">{business.whatsappDisplay}</p>
+						<p>{business.phone}</p>
+					</div>
+					<div>
+						<p class="font-semibold text-white">Retiro</p>
+						<p class="mt-2">{business.address}</p>
+					</div>
+					<div>
+						<p class="font-semibold text-white">Redes</p>
+						<p class="mt-2">{business.instagram}</p>
+						<p>{business.facebook}</p>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+		<div data-cart-backdrop class="pointer-events-none fixed inset-0 z-[60] bg-black/60 opacity-0 transition duration-300"></div>
+
+		<aside data-cart-drawer class="drawer-shell">
+			<div class="flex items-center justify-between border-b border-white/8 px-5 py-4">
+				<div>
+					<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Tu pedido</p>
+					<h2 class="mt-1 text-2xl font-bold text-white">Carrito</h2>
+				</div>
+				<button
+					type="button"
+					data-close-cart
+					class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#202027] text-lg text-white hover:border-white/20"
+				>
+					✕
+				</button>
+			</div>
+
+			<div class="flex-1 overflow-y-auto px-5 py-5">
+				<div data-cart-empty class="surface-card p-5 text-sm leading-7 text-slate-300">
+					No agregaste nada todavia. Elegi una pizza, suma unas empanadas y cerra el pedido por WhatsApp.
+				</div>
+				<ul data-cart-items class="space-y-3"></ul>
+
+				<div class="surface-card mt-5 p-5">
+					<div>
+						<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Forma de pago</p>
+						<div class="mt-3 flex flex-wrap gap-2">
+							<button
+								type="button"
+								data-payment-option
+								data-value="Efectivo"
+								class="choice-option is-selected"
+								aria-pressed="true"
+							>
+								Efectivo
+							</button>
+							<button
+								type="button"
+								data-payment-option
+								data-value="Mercado Pago"
+								class="choice-option"
+								aria-pressed="false"
+							>
+								Mercado Pago
+							</button>
+						</div>
+					</div>
+
+					<div class="mt-5">
+						<p class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">Metodo de entrega</p>
+						<div class="mt-3 flex flex-wrap gap-2">
+							<button
+								type="button"
+								data-fulfillment-option
+								data-value="Retiro en el local"
+								class="choice-option is-selected"
+								aria-pressed="true"
+							>
+								Retiro en el local
+							</button>
+							<button
+								type="button"
+								data-fulfillment-option
+								data-value="Delivery"
+								class="choice-option"
+								aria-pressed="false"
+							>
+								Delivery
+							</button>
+						</div>
+						<p class="mt-3 text-xs leading-5 text-slate-400">
+							Si elegis delivery, podes dejar direccion o referencias en la nota.
+						</p>
+					</div>
+
+					<div class="mt-5">
+						<label for="order-note" class="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">
+							Nota opcional
+						</label>
+						<textarea
+							id="order-note"
+							data-order-note
+							rows="3"
+							placeholder="Ej: sin cebolla, timbre del segundo piso, enviar cubiertos..."
+							class="mt-3 w-full rounded-[18px] border border-white/10 bg-[#1a1a20] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-orange-300/45"
+						></textarea>
+					</div>
+				</div>
+			</div>
+
+			<div class="border-t border-white/8 px-5 py-5">
+				<div class="surface-card p-5">
+					<div class="flex items-center justify-between text-sm text-slate-300">
+						<span>Productos</span>
+						<span data-cart-count-text>0 items</span>
+					</div>
+					<div class="mt-3 flex items-center justify-between text-sm text-slate-300">
+						<span>Subtotal</span>
+						<span data-cart-subtotal>{money.format(0)}</span>
+					</div>
+					<div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+						<span class="text-lg font-semibold text-white">Total</span>
+						<span data-cart-total class="text-2xl font-bold text-white">{money.format(0)}</span>
+					</div>
+				</div>
+
+				<button
+					type="button"
+					data-demo-checkout
+					disabled
+					aria-disabled="true"
+					class="cta-primary mt-4 w-full opacity-60 disabled:cursor-not-allowed"
+				>
+					Enviar pedido por WhatsApp
+				</button>
+			</div>
+		</aside>
+
+		<div
+			data-demo-modal
+			class="pointer-events-none fixed inset-0 z-[80] flex items-center justify-center bg-black/70 px-4 opacity-0 transition duration-300"
+			aria-hidden="true"
+		>
+			<div class="surface-card w-full max-w-[560px] p-6 sm:p-7">
+				<div class="flex items-start justify-between gap-4">
+					<div>
+						<p class="text-xs font-semibold uppercase tracking-[0.22em] text-orange-200">Demo TienditaWeb</p>
+						<h2 class="mt-2 text-3xl font-bold text-white">Este pedido es una muestra</h2>
+					</div>
+					<button
+						type="button"
+						data-close-demo-modal
+						class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#202027] text-lg text-white hover:border-white/20"
+					>
+						✕
+					</button>
+				</div>
+
+				<p class="mt-4 text-sm leading-7 text-slate-300">
+					Esta tienda es una demo pensada para mostrar como puede verse un negocio real dentro de TienditaWeb. El pedido no se envia a WhatsApp: solo simula el flujo final.
+				</p>
+
+				<div class="mt-5 rounded-[22px] border border-white/10 bg-[#1a1a20] p-4">
+					<p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Resumen demo</p>
+					<pre
+						data-demo-summary
+						class="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-6 text-slate-200"
+					></pre>
+				</div>
+
+				<div class="mt-6 flex flex-col gap-3 sm:flex-row">
+					<a
+						href="https://tienditaweb.com.ar"
+						target="_blank"
+						rel="noreferrer"
+						class="cta-primary flex-1"
+					>
+						Ir a TienditaWeb.com.ar
+					</a>
+					<button type="button" data-close-demo-modal class="cta-secondary flex-1">
+						Volver a la demo
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<button type="button" data-open-cart data-floating-cart class="floating-cart" aria-hidden="true">
+			<span class="inline-flex items-center gap-2">
+				<span>Carrito</span>
+				<span
+					data-floating-badge
+					class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-white"
+				>
+					0
+				</span>
+			</span>
+			<span class="text-right">
+				<span data-floating-count class="block text-xs font-medium text-slate-300">0 items</span>
+				<span data-floating-total class="block text-sm font-semibold text-white">{money.format(0)}</span>
+			</span>
+		</button>
+	</div>
+
+	<script
+		is:inline
+		define:vars={{
+			business,
+			categories,
+			clientCatalog,
+		}}
+	>
+		const formatter = new Intl.NumberFormat('es-AR', {
+			style: 'currency',
+			currency: 'ARS',
+			maximumFractionDigits: 0,
+		});
+
+		const catalog = new Map(clientCatalog.map((product) => [product.id, product]));
+		const selectedVariants = new Map();
+		const cart = new Map();
+
+		const header = document.querySelector('[data-site-header]');
+		const headerCategoryNav = document.querySelector('[data-header-category-nav]');
+		const inlineCategories = document.querySelector('[data-inline-categories]');
+		const categoryNavs = Array.from(document.querySelectorAll('[data-category-nav]'));
+		const categoryLinks = Array.from(document.querySelectorAll('[data-category-link]'));
+		const categorySections = Array.from(document.querySelectorAll('[data-category-section]'));
+		const priceDisplays = document.querySelectorAll('[data-price-display]');
+		const sizeDisplays = document.querySelectorAll('[data-size-display]');
+		const cartDrawer = document.querySelector('[data-cart-drawer]');
+		const cartBackdrop = document.querySelector('[data-cart-backdrop]');
+		const cartItemsElement = document.querySelector('[data-cart-items]');
+		const cartEmptyElement = document.querySelector('[data-cart-empty]');
+		const cartSubtotalElement = document.querySelector('[data-cart-subtotal]');
+		const cartTotalElement = document.querySelector('[data-cart-total]');
+		const cartCountText = document.querySelector('[data-cart-count-text]');
+		const demoCheckoutButton = document.querySelector('[data-demo-checkout]');
+		const demoModal = document.querySelector('[data-demo-modal]');
+		const demoSummary = document.querySelector('[data-demo-summary]');
+		const cartBadges = Array.from(document.querySelectorAll('[data-cart-count-badge]'));
+		const floatingCart = document.querySelector('[data-floating-cart]');
+		const floatingBadge = document.querySelector('[data-floating-badge]');
+		const floatingCount = document.querySelector('[data-floating-count]');
+		const floatingTotal = document.querySelector('[data-floating-total]');
+		const paymentOptions = Array.from(document.querySelectorAll('[data-payment-option]'));
+		const fulfillmentOptions = Array.from(document.querySelectorAll('[data-fulfillment-option]'));
+		const orderNoteInput = document.querySelector('[data-order-note]');
+		const openCartButtons = Array.from(document.querySelectorAll('[data-open-cart]'));
+		const closeCartButtons = Array.from(document.querySelectorAll('[data-close-cart]'));
+		const closeDemoModalButtons = Array.from(document.querySelectorAll('[data-close-demo-modal]'));
+
+		let demoMessage = '';
+		const orderDetails = {
+			payment: 'Efectivo',
+			fulfillment: 'Retiro en el local',
+			note: '',
+		};
+
+		const firstCategoryId = categories[0]?.id;
+		let activeCategoryId = firstCategoryId;
+
+		const setStickyOffset = () => {
+			if (!header) return;
+			document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+		};
+
+		const updateFloatingCartVisibility = () => {
+			if (!(floatingCart instanceof HTMLElement)) return;
+			const shouldShow = window.scrollY > 280;
+			floatingCart.classList.toggle('is-visible', shouldShow);
+			floatingCart.setAttribute('aria-hidden', String(!shouldShow));
+		};
+
+		const updateStickyCategoriesVisibility = () => {
+			if (!(headerCategoryNav instanceof HTMLElement) || !(inlineCategories instanceof HTMLElement)) return;
+			const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0;
+			const shouldShow = inlineCategories.getBoundingClientRect().top <= headerHeight + 8;
+			headerCategoryNav.classList.toggle('is-visible', shouldShow);
+		};
+
+		const setActiveCategory = (categoryId) => {
+			if (!categoryId || categoryId === activeCategoryId) return;
+			activeCategoryId = categoryId;
+
+			categoryLinks.forEach((link) => {
+				const isActive = link.dataset.categoryId === categoryId;
+				link.classList.toggle('is-active', isActive);
+			});
+
+			categoryNavs.forEach((nav) => {
+				if (!(nav instanceof HTMLElement)) return;
+				const activeLink = nav.querySelector(`[data-category-link][data-category-id="${categoryId}"]`);
+				if (!(activeLink instanceof HTMLElement)) return;
+
+				const navCenter = nav.clientWidth / 2;
+				const targetLeft = activeLink.offsetLeft - navCenter + activeLink.clientWidth / 2;
+				nav.scrollTo({
+					left: Math.max(0, targetLeft),
+					behavior: 'auto',
+				});
+			});
+		};
+
+		const getScrollOffset = () => {
+			const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0;
+			return headerHeight + 14;
+		};
+
+		const scrollToCategory = (categoryId) => {
+			const target = document.getElementById(categoryId);
+			if (!target) return;
+			const top = target.getBoundingClientRect().top + window.scrollY - getScrollOffset();
+			window.scrollTo({ top, behavior: 'smooth' });
+		};
+
+		const openCart = () => {
+			if (!(cartDrawer instanceof HTMLElement) || !(cartBackdrop instanceof HTMLElement)) return;
+			document.body.classList.add('drawer-open');
+			cartDrawer.classList.add('is-open');
+			cartBackdrop.classList.remove('pointer-events-none');
+			cartBackdrop.classList.remove('opacity-0');
+		};
+
+		const closeCart = () => {
+			if (!(cartDrawer instanceof HTMLElement) || !(cartBackdrop instanceof HTMLElement)) return;
+			document.body.classList.remove('drawer-open');
+			cartDrawer.classList.remove('is-open');
+			cartBackdrop.classList.add('pointer-events-none');
+			cartBackdrop.classList.add('opacity-0');
+		};
+
+		const openDemoModal = () => {
+			if (!(demoModal instanceof HTMLElement)) return;
+			if (demoSummary instanceof HTMLElement) {
+				demoSummary.textContent = demoMessage;
+			}
+			closeCart();
+			document.body.classList.add('demo-modal-open');
+			demoModal.classList.remove('pointer-events-none');
+			demoModal.classList.remove('opacity-0');
+			demoModal.setAttribute('aria-hidden', 'false');
+		};
+
+		const closeDemoModal = () => {
+			if (!(demoModal instanceof HTMLElement)) return;
+			document.body.classList.remove('demo-modal-open');
+			demoModal.classList.add('pointer-events-none');
+			demoModal.classList.add('opacity-0');
+			demoModal.setAttribute('aria-hidden', 'true');
+		};
+
+		const setCheckoutState = (enabled) => {
+			if (!(demoCheckoutButton instanceof HTMLButtonElement)) return;
+			demoCheckoutButton.disabled = !enabled;
+			demoCheckoutButton.setAttribute('aria-disabled', String(!enabled));
+			demoCheckoutButton.classList.toggle('opacity-60', !enabled);
+		};
+
+		const syncChoiceButtons = (buttons, selectedValue) => {
+			buttons.forEach((button) => {
+				if (!(button instanceof HTMLButtonElement)) return;
+				const isSelected = button.dataset.value === selectedValue;
+				button.classList.toggle('is-selected', isSelected);
+				button.setAttribute('aria-pressed', String(isSelected));
+			});
+		};
+
+		const getSelectedVariant = (productId) => {
+			const product = catalog.get(productId);
+			if (!product) return null;
+			if (product.variants.length === 0) return null;
+
+			if (selectedVariants.has(productId)) {
+				return selectedVariants.get(productId);
+			}
+
+			const defaultVariant = product.variants[0];
+			selectedVariants.set(productId, defaultVariant);
+			return defaultVariant;
+		};
+
+		const updateVisiblePrice = (productId) => {
+			const product = catalog.get(productId);
+			if (!product) return;
+
+			const selectedVariant = getSelectedVariant(productId);
+			const price = selectedVariant?.price ?? product.price ?? 0;
+			const label = selectedVariant?.label ?? 'Por unidad';
+
+			priceDisplays.forEach((node) => {
+				if (node.dataset.priceDisplay === productId) {
+					node.textContent = formatter.format(price);
+				}
+			});
+
+			sizeDisplays.forEach((node) => {
+				if (node.dataset.sizeDisplay === productId) {
+					node.textContent = label;
+				}
+			});
+		};
+
+		const buildCartKey = (productId, variantId = 'base') => `${productId}::${variantId}`;
+
+		const addItem = (productId) => {
+			const product = catalog.get(productId);
+			if (!product) return;
+
+			const selectedVariant = getSelectedVariant(productId);
+			const variantId = selectedVariant?.id ?? 'base';
+			const variantLabel = selectedVariant?.label ?? null;
+			const unitPrice = selectedVariant?.price ?? product.price ?? 0;
+			const key = buildCartKey(productId, variantId);
+			const existing = cart.get(key);
+
+			cart.set(key, {
+				key,
+				productId,
+				name: product.name,
+				variantId,
+				variantLabel,
+				unitPrice,
+				quantity: existing ? existing.quantity + 1 : 1,
+			});
+
+			renderCart();
+
+			const trigger = document.querySelector(`[data-add-to-cart][data-product-id="${productId}"]`);
+			if (trigger instanceof HTMLElement) {
+				trigger.classList.add('cart-button-bump');
+				window.setTimeout(() => trigger.classList.remove('cart-button-bump'), 320);
+			}
+		};
+
+		const incrementItem = (key) => {
+			const item = cart.get(key);
+			if (!item) return;
+			item.quantity += 1;
+			cart.set(key, item);
+			renderCart();
+		};
+
+		const decrementItem = (key) => {
+			const item = cart.get(key);
+			if (!item) return;
+			if (item.quantity <= 1) {
+				cart.delete(key);
+			} else {
+				item.quantity -= 1;
+				cart.set(key, item);
+			}
+			renderCart();
+		};
+
+		const removeItem = (key) => {
+			cart.delete(key);
+			renderCart();
+		};
+
+		const buildMessage = (items, total) => {
+			const noteLine = orderDetails.note ? `Nota: ${orderDetails.note}` : 'Nota: sin aclaraciones';
+
+			return [
+				`Hola ${business.name}, quiero hacer este pedido:`,
+				'',
+				...items.map((item) => {
+					const variantPart = item.variantLabel ? ` - ${item.variantLabel}` : '';
+					return `- ${item.quantity}x ${item.name}${variantPart} (${formatter.format(item.unitPrice * item.quantity)})`;
+				}),
+				'',
+				`Pago: ${orderDetails.payment}`,
+				`Entrega: ${orderDetails.fulfillment}`,
+				noteLine,
+				`Total: ${formatter.format(total)}`,
+				`${orderDetails.fulfillment}.`,
+			].join('\n');
+		};
+
+		const renderCart = () => {
+			if (
+				!(cartItemsElement instanceof HTMLElement) ||
+				!(cartEmptyElement instanceof HTMLElement) ||
+				!(cartSubtotalElement instanceof HTMLElement) ||
+				!(cartTotalElement instanceof HTMLElement) ||
+				!(cartCountText instanceof HTMLElement)
+			) {
+				return;
+			}
+
+			const entries = Array.from(cart.values());
+			const count = entries.reduce((sum, item) => sum + item.quantity, 0);
+			const total = entries.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+			cartBadges.forEach((badge) => {
+				badge.textContent = String(count);
+				badge.classList.toggle('cart-badge--pulse', count > 0);
+			});
+
+			cartCountText.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+			cartSubtotalElement.textContent = formatter.format(total);
+			cartTotalElement.textContent = formatter.format(total);
+
+			if (
+				floatingCart instanceof HTMLElement &&
+				floatingBadge instanceof HTMLElement &&
+				floatingCount instanceof HTMLElement &&
+				floatingTotal instanceof HTMLElement
+			) {
+				floatingBadge.textContent = String(count);
+				floatingCount.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+				floatingTotal.textContent = formatter.format(total);
+			}
+			updateFloatingCartVisibility();
+
+			if (entries.length === 0) {
+				cartEmptyElement.classList.remove('hidden');
+				cartItemsElement.innerHTML = '';
+				demoMessage = '';
+				setCheckoutState(false);
+				updateFloatingCartVisibility();
+				return;
+			}
+
+			cartEmptyElement.classList.add('hidden');
+			cartItemsElement.innerHTML = entries
+				.map(
+					(item) => `
+						<li class="surface-card p-4">
+							<div class="flex items-start justify-between gap-4">
+								<div>
+									<h3 class="font-semibold text-white">${item.name}</h3>
+									<p class="mt-1 text-xs uppercase tracking-[0.16em] text-slate-400">${item.variantLabel ?? 'Por unidad'}</p>
+								</div>
+								<p class="font-semibold text-white">${formatter.format(item.unitPrice * item.quantity)}</p>
+							</div>
+							<div class="mt-4 flex items-center justify-between gap-3">
+								<div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-2 py-1">
+									<button type="button" class="cart-stepper" data-cart-action="decrement" data-cart-key="${item.key}">-</button>
+									<span class="min-w-7 text-center text-sm font-semibold text-white">${item.quantity}</span>
+									<button type="button" class="cart-stepper" data-cart-action="increment" data-cart-key="${item.key}">+</button>
+								</div>
+								<button type="button" data-cart-action="remove" data-cart-key="${item.key}" class="text-sm font-semibold text-slate-300 hover:text-white">
+									Quitar
+								</button>
+							</div>
+						</li>
+					`,
+				)
+				.join('');
+
+			demoMessage = buildMessage(entries, total);
+			setCheckoutState(true);
+		};
+
+		categoryLinks.forEach((link) => {
+			link.addEventListener('click', (event) => {
+				event.preventDefault();
+				const categoryId = link.dataset.categoryId;
+				if (!categoryId) return;
+				setActiveCategory(categoryId);
+				scrollToCategory(categoryId);
+			});
+		});
+
+		closeCartButtons.forEach((button) => button.addEventListener('click', closeCart));
+		openCartButtons.forEach((button) => button.addEventListener('click', openCart));
+		closeDemoModalButtons.forEach((button) => button.addEventListener('click', closeDemoModal));
+		paymentOptions.forEach((button) =>
+			button.addEventListener('click', () => {
+				if (!(button instanceof HTMLButtonElement)) return;
+				orderDetails.payment = button.dataset.value ?? orderDetails.payment;
+				syncChoiceButtons(paymentOptions, orderDetails.payment);
+				renderCart();
+			}),
+		);
+		fulfillmentOptions.forEach((button) =>
+			button.addEventListener('click', () => {
+				if (!(button instanceof HTMLButtonElement)) return;
+				orderDetails.fulfillment = button.dataset.value ?? orderDetails.fulfillment;
+				syncChoiceButtons(fulfillmentOptions, orderDetails.fulfillment);
+				renderCart();
+			}),
+		);
+		orderNoteInput?.addEventListener('input', () => {
+			if (!(orderNoteInput instanceof HTMLTextAreaElement)) return;
+			orderDetails.note = orderNoteInput.value.trim();
+			renderCart();
+		});
+		cartBackdrop?.addEventListener('click', closeCart);
+		demoModal?.addEventListener('click', (event) => {
+			if (event.target === demoModal) closeDemoModal();
+		});
+		demoCheckoutButton?.addEventListener('click', openDemoModal);
+		window.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape') closeCart();
+			if (event.key === 'Escape') closeDemoModal();
+		});
+
+		document.addEventListener('click', (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLElement)) return;
+
+			const variantButton = target.closest('[data-variant-button]');
+			if (variantButton instanceof HTMLButtonElement) {
+				const { productId, variantId, variantLabel, variantPrice } = variantButton.dataset;
+				if (!productId || !variantId || !variantLabel || !variantPrice) return;
+
+				selectedVariants.set(productId, {
+					id: variantId,
+					label: variantLabel,
+					price: Number(variantPrice),
+				});
+
+				document
+					.querySelectorAll(`[data-variant-button][data-product-id="${productId}"]`)
+					.forEach((button) => {
+						const isSelected = button === variantButton;
+						button.classList.toggle('is-selected', isSelected);
+						button.setAttribute('aria-pressed', String(isSelected));
+					});
+
+				updateVisiblePrice(productId);
+				return;
+			}
+
+			const addButton = target.closest('[data-add-to-cart]');
+			if (addButton instanceof HTMLButtonElement) {
+				const productId = addButton.dataset.productId;
+				if (!productId) return;
+				addItem(productId);
+				return;
+			}
+
+			const cartControl = target.closest('[data-cart-action]');
+			if (!(cartControl instanceof HTMLElement)) return;
+
+			const action = cartControl.dataset.cartAction;
+			const cartKey = cartControl.dataset.cartKey;
+			if (!action || !cartKey) return;
+
+			if (action === 'increment') incrementItem(cartKey);
+			if (action === 'decrement') decrementItem(cartKey);
+			if (action === 'remove') removeItem(cartKey);
+		});
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries
+					.filter((entry) => entry.isIntersecting)
+					.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+				const nextCategoryId = visible?.target instanceof HTMLElement ? visible.target.dataset.categoryId : null;
+				if (nextCategoryId) setActiveCategory(nextCategoryId);
+			},
+			{
+				rootMargin: '-20% 0px -55% 0px',
+				threshold: [0.2, 0.35, 0.5],
+			},
+		);
+
+		categorySections.forEach((section) => observer.observe(section));
+
+		clientCatalog.forEach((product) => {
+			if (product.variants.length > 0) {
+				selectedVariants.set(product.id, product.variants[0]);
+				updateVisiblePrice(product.id);
+			}
+		});
+		syncChoiceButtons(paymentOptions, orderDetails.payment);
+		syncChoiceButtons(fulfillmentOptions, orderDetails.fulfillment);
+
+		setStickyOffset();
+		updateStickyCategoriesVisibility();
+		updateFloatingCartVisibility();
+		window.addEventListener('resize', setStickyOffset);
+		window.addEventListener('resize', updateStickyCategoriesVisibility);
+		window.addEventListener('scroll', updateStickyCategoriesVisibility, { passive: true });
+		window.addEventListener('scroll', updateFloatingCartVisibility, { passive: true });
+		renderCart();
+	</script>
+</BaseLayout>

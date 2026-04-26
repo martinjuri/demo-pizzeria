@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#0F172A"/>
+  <circle cx="32" cy="32" r="18" fill="url(#plate)"/>
+  <path d="M23 35c4-9 14-16 18-17-1 9-5 20-15 24-5 2-9-2-3-7Z" fill="#86EFAC"/>
+  <path d="M33 21c5 2 8 5 10 11-7 0-10 4-13 9-2-6-1-15 3-20Z" fill="#FB923C"/>
+  <defs>
+    <radialGradient id="plate" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(27 25) rotate(48.3665) scale(29.1594)">
+      <stop stop-color="#1E293B"/>
+      <stop offset="1" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+</svg>

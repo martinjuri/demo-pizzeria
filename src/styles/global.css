@@ -1,0 +1,436 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-brand-red: #ef4444;
+	--color-brand-orange: #f97316;
+	--color-brand-yellow: #facc15;
+	--color-brand-ink: #0f0f12;
+	--font-sans: 'Plus Jakarta Sans', 'Aptos', 'Segoe UI', sans-serif;
+	--font-display: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+}
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply bg-brand-ink font-sans text-[16px] text-slate-100 antialiased;
+		background: #19191d;
+		min-height: 100vh;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-display);
+		letter-spacing: -0.04em;
+	}
+
+	a,
+	button {
+		@apply transition duration-300;
+	}
+
+	button {
+		@apply cursor-pointer;
+	}
+
+	::selection {
+		background: rgba(249, 115, 22, 0.35);
+		color: white;
+	}
+}
+
+@layer components {
+	.container-shell {
+		@apply mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8;
+	}
+
+	.section-space {
+		@apply py-8 sm:py-10 lg:py-12;
+	}
+
+	.surface-panel {
+		@apply rounded-[28px] border border-white/8 bg-[#202027] shadow-[0_26px_70px_rgba(0,0,0,0.28)];
+	}
+
+	.surface-card {
+		@apply rounded-[24px] border border-white/8 bg-[#24242c] shadow-[0_18px_48px_rgba(0,0,0,0.24)];
+	}
+
+	.eyebrow {
+		@apply inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-orange-300;
+	}
+
+	.brand-script {
+		@apply relative inline-block;
+	}
+
+	.brand-script::after {
+		content: '';
+		@apply absolute -bottom-1 left-0 h-[3px] w-16 rounded-full bg-brand-orange;
+	}
+
+	.cta-primary {
+		@apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_36px_rgba(249,115,22,0.22)] hover:-translate-y-0.5 hover:bg-[#ff8a2a];
+	}
+
+	.cta-secondary {
+		@apply inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-transparent px-5 py-3 text-sm font-semibold text-white hover:border-orange-300/35 hover:text-orange-100;
+	}
+
+	.info-chip {
+		@apply inline-flex items-center gap-2 rounded-full border border-white/8 bg-[#202027] px-3 py-2 text-sm text-slate-200;
+	}
+
+	.category-pill {
+		@apply inline-flex shrink-0 items-center gap-2 rounded-full border border-transparent bg-[#15151a] px-4 py-2.5 text-sm font-semibold text-slate-300;
+	}
+
+	.category-pill.is-active {
+		@apply border-orange-300/35 bg-[#24242b] text-orange-100;
+	}
+
+	.variant-button {
+		@apply inline-flex items-center justify-center rounded-full border border-white/10 bg-[#1a1a20] px-4 py-2 text-sm font-semibold text-slate-300;
+	}
+
+	.variant-button.is-selected {
+		@apply border-orange-300/45 bg-[#302114] text-orange-100;
+	}
+
+	.choice-option {
+		@apply inline-flex items-center justify-center rounded-full border border-white/10 bg-[#1a1a20] px-4 py-2 text-sm font-semibold text-slate-300;
+	}
+
+	.choice-option.is-selected {
+		@apply border-orange-300/45 bg-[#302114] text-orange-100;
+	}
+
+	.badge {
+		@apply inline-flex items-center rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.2em];
+	}
+
+	.badge-hot {
+		@apply border-red-300/35 bg-red-400/12 text-red-200;
+	}
+
+	.badge-soft {
+		@apply border-orange-300/30 bg-orange-400/12 text-orange-200;
+	}
+
+	.metric-card {
+		@apply rounded-[20px] border border-white/8 bg-[#212129] p-4;
+	}
+
+	.cart-stepper {
+		@apply flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#202027] text-lg font-medium text-white hover:border-orange-300/40 hover:text-orange-100;
+	}
+
+	.drawer-shell {
+		@apply fixed inset-y-0 right-0 z-[70] flex w-full max-w-[420px] translate-x-full flex-col border-l border-white/8 bg-[#17171c] shadow-[-20px_0_90px_rgba(0,0,0,0.42)] transition duration-300;
+	}
+
+	.drawer-shell.is-open {
+		@apply translate-x-0;
+	}
+
+	.floating-cart {
+		@apply fixed bottom-4 right-4 z-40 flex min-w-[12.5rem] items-center justify-between gap-3 rounded-full border border-white/8 bg-[#17171c] px-4 py-3 text-sm font-semibold text-white shadow-[0_24px_80px_rgba(0,0,0,0.38)];
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(14px);
+		transition: opacity 220ms ease, transform 220ms ease;
+	}
+}
+
+.floating-cart.is-visible {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
+}
+
+.header-category-nav {
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(-6px);
+	transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.header-category-nav.is-visible {
+	pointer-events: auto;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.inline-categories-strip {
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 24px;
+	background: #18181d;
+	padding-inline: 12px;
+	padding-block: 12px;
+}
+
+body.drawer-open {
+	overflow: hidden;
+}
+
+body.demo-modal-open {
+	overflow: hidden;
+}
+
+.hero-stage {
+	background: transparent;
+}
+
+.hero-visual {
+	position: relative;
+	min-height: 340px;
+}
+
+.hero-board {
+	position: absolute;
+	right: -6%;
+	top: 18px;
+	height: 310px;
+	width: 310px;
+	border-radius: 999px;
+	background: #7a4c2b;
+	box-shadow:
+		inset 0 0 0 14px rgba(87, 53, 28, 0.75),
+		inset 0 0 0 28px rgba(112, 72, 43, 0.85),
+		0 26px 50px rgba(0, 0, 0, 0.32);
+	opacity: 0.96;
+}
+
+.hero-pizza {
+	position: absolute;
+	right: 14%;
+	top: 64px;
+	height: 230px;
+	width: 230px;
+	border-radius: 999px;
+	background: #d69347;
+	box-shadow:
+		inset 0 0 0 14px #c88039,
+		0 24px 56px rgba(0, 0, 0, 0.34);
+}
+
+.hero-pizza::before {
+	content: '';
+	position: absolute;
+	inset: 18px;
+	border-radius: 999px;
+	background:
+		radial-gradient(circle at 20% 26%, #a92d1f 0 8px, transparent 9px),
+		radial-gradient(circle at 54% 22%, #a92d1f 0 9px, transparent 10px),
+		radial-gradient(circle at 72% 34%, #a92d1f 0 8px, transparent 9px),
+		radial-gradient(circle at 32% 54%, #a92d1f 0 9px, transparent 10px),
+		radial-gradient(circle at 63% 58%, #a92d1f 0 9px, transparent 10px),
+		radial-gradient(circle at 44% 74%, #a92d1f 0 8px, transparent 9px),
+		radial-gradient(circle at 78% 72%, #a92d1f 0 8px, transparent 9px),
+		radial-gradient(circle at 27% 80%, #a92d1f 0 7px, transparent 8px),
+		radial-gradient(circle at 68% 82%, #a92d1f 0 7px, transparent 8px),
+		radial-gradient(circle at 50% 50%, #f4b44c 0 48%, #e8a143 49% 64%, transparent 65%);
+}
+
+.hero-pizza::after {
+	content: '';
+	position: absolute;
+	inset: 30px;
+	border-radius: 999px;
+	background:
+		radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.75) 0 2px, transparent 3px),
+		radial-gradient(circle at 60% 34%, rgba(255, 255, 255, 0.75) 0 2px, transparent 3px),
+		radial-gradient(circle at 70% 68%, rgba(255, 255, 255, 0.75) 0 2px, transparent 3px),
+		radial-gradient(circle at 36% 68%, rgba(255, 255, 255, 0.75) 0 2px, transparent 3px),
+		radial-gradient(circle at 50% 46%, #6b8b38 0 5px, transparent 6px),
+		radial-gradient(circle at 34% 52%, #6b8b38 0 4px, transparent 5px),
+		radial-gradient(circle at 70% 44%, #6b8b38 0 4px, transparent 5px),
+		radial-gradient(circle at 54% 74%, #6b8b38 0 4px, transparent 5px);
+}
+
+.hero-ticket {
+	position: absolute;
+	left: 0;
+	bottom: 10px;
+	width: min(250px, 74%);
+	border-radius: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #23232b;
+	box-shadow: 0 22px 44px rgba(0, 0, 0, 0.24);
+}
+
+.hero-ticket::before {
+	content: '';
+	position: absolute;
+	left: 18px;
+	right: 18px;
+	top: 50%;
+	border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.product-card:hover .product-scene {
+	transform: translateY(-4px) scale(1.01);
+	box-shadow: 0 26px 80px rgba(0, 0, 0, 0.42);
+}
+
+.product-scene {
+	position: relative;
+	overflow: hidden;
+	border-radius: 26px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #1c1c22;
+	min-height: 220px;
+	transition: transform 260ms ease, box-shadow 260ms ease;
+}
+
+.product-scene::before {
+	content: '';
+	position: absolute;
+	inset: 18px 22px 32px;
+	border-radius: 999px;
+	background: #2a2a31;
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+		0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.product-scene::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 52%;
+	transform: translate(-50%, -50%);
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+		0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.product-scene[data-scene='pizza']::after {
+	width: 162px;
+	height: 162px;
+	border-radius: 999px;
+	background: #d69347;
+	box-shadow:
+		inset 0 0 0 12px #c88039,
+		0 18px 36px rgba(0, 0, 0, 0.22);
+}
+
+.product-scene[data-scene='empanada']::after {
+	width: 170px;
+	height: 112px;
+	border-radius: 120px 120px 90px 90px;
+	background: #dca259;
+}
+
+.product-scene[data-scene='burger']::after {
+	width: 178px;
+	height: 128px;
+	border-radius: 999px 999px 90px 90px;
+	background:
+		linear-gradient(
+			180deg,
+			#d6a44f 0 28%,
+			#2f7d39 28% 37%,
+			#f3f3ef 37% 46%,
+			#c24b35 46% 56%,
+			#f2c438 56% 66%,
+			#5c3422 66% 82%,
+			#d6a44f 82% 100%
+		);
+}
+
+.promo-banner {
+	background: #1f1f26;
+}
+
+.map-mock {
+	background:
+		linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+		linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+		#1f1f26;
+	background-size: 58px 58px, 58px 58px, 100% 100%;
+}
+
+.map-road {
+	position: absolute;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.cart-badge--pulse {
+	animation: badgePulse 1.8s ease-in-out infinite;
+}
+
+.cart-button-bump {
+	animation: buttonBump 320ms ease;
+}
+
+@keyframes badgePulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.22);
+	}
+	50% {
+		box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+	}
+}
+
+@keyframes buttonBump {
+	0% {
+		transform: scale(1);
+	}
+	45% {
+		transform: scale(1.08);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@media (max-width: 639px) {
+	.hero-visual {
+		min-height: 300px;
+	}
+
+	.hero-board {
+		right: -18%;
+		top: 12px;
+		height: 250px;
+		width: 250px;
+	}
+
+	.hero-pizza {
+		right: 10%;
+		top: 58px;
+		height: 186px;
+		width: 186px;
+	}
+
+	.hero-ticket {
+		width: min(220px, 78%);
+	}
+
+	.product-scene {
+		min-height: 200px;
+	}
+
+	.product-scene[data-scene='pizza']::after {
+		width: 148px;
+		height: 148px;
+	}
+
+	.product-scene[data-scene='empanada']::after {
+		width: 156px;
+		height: 104px;
+	}
+
+	.product-scene[data-scene='burger']::after {
+		width: 160px;
+		height: 116px;
+	}
+}
