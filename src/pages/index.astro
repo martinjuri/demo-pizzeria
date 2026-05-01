@@ -21,26 +21,6 @@ const structuredData = [
 		areaServed: business.location,
 		url: Astro.url.href,
 	},
-	{
-		'@context': 'https://schema.org',
-		'@type': 'ItemList',
-		name: 'Carta Pizzeria',
-		itemListElement: products.map((product, index) => ({
-			'@type': 'ListItem',
-			position: index + 1,
-			item: {
-				'@type': 'Product',
-				name: product.name,
-				description: product.description,
-				offers: {
-					'@type': 'Offer',
-					price: product.price ?? product.variants?.[0]?.price ?? 0,
-					priceCurrency: 'ARS',
-					availability: 'https://schema.org/InStock',
-				},
-			},
-		})),
-	},
 ];
 
 const categoriesWithProducts = categories.map((category) => ({

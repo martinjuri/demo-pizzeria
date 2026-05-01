@@ -19,6 +19,7 @@ const { title, description, canonical, structuredData = [] } = Astro.props;
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="theme-color" content="#0f0f12" />
+		<meta name="robots" content="noindex, nofollow" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
